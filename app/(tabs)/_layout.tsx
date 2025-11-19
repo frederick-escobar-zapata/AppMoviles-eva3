@@ -27,18 +27,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="index"
-        options={{
-          href: null, // Esto oculta la tab
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          href: null, // Esto oculta la tab
-        }}
-      />
+      
     </Tabs>
   );
 }
