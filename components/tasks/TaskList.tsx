@@ -1,7 +1,7 @@
 import TaskItem from '@/components/task-item';
 import type { Task } from '@/constants/types';
 import React from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 
 interface TaskListProps {
   tasks: Task[];
@@ -14,16 +14,22 @@ interface TaskListProps {
 export default function TaskList({ tasks, onToggle, onRemove, onViewImage, onViewLocation }: TaskListProps) {
   return (
     <View>
-      {tasks.map((task) => (
-        <TaskItem
-          key={task.id}
-          task={task}
-          onToggle={() => onToggle(task.id)}
-          onRemove={() => onRemove(task.id)}
-          onViewImage={() => onViewImage(task.photoUri)}
-          onViewLocation={() => onViewLocation(task.location)}
-        />
-      ))}
-    </View>
+  {Array.isArray(tasks) ? (
+    tasks.map((task) => (
+      <TaskItem
+        key={task.id}
+        task={task}
+        onToggle={() => onToggle(task.id)}
+        onRemove={() => onRemove(task.id)}
+        onViewImage={() => onViewImage(task.photoUri)}
+        onViewLocation={() => onViewLocation(task.location)}
+      />
+    ))
+  ) : (
+    <Text >
+      Error: las tareas no están en formato de arreglo
+    </Text>
+  )}
+</View>
   );
 }

@@ -1,30 +1,30 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+        KeyboardAvoidingView,
+        Platform,
+        ScrollView,
+        Text,
+        TextInput,
+        TouchableOpacity,
+        View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../components/CustomButton";
 import { indexStyles } from "../components/styles/indexStyles";
 import { useUser } from "../contexts/UserContext";
-import { login } from "./servicios/api"; // Importamos la función del backend
+import { register as registerApi } from "./servicios/api";
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setUser, setToken } = useUser();
 
-  const handleLogin = async () => {
-    setErrorMessage(""); // Limpiar errores previos
+  const handleRegister = async () => {
+    setErrorMessage("");
 
     if (!email.trim()) {
       setErrorMessage("Por favor ingresa tu email");
@@ -32,36 +32,36 @@ export default function LoginScreen() {
     }
 
     if (!password.trim()) {
-      setErrorMessage("Por favor ingresa tu contraseña");
+      setErrorMessage("Por favor ingresa una contraseña");
+      return;
+    }
+
+    if (password.trim().length < 6) {
+      setErrorMessage("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Las contraseñas no coinciden");
       return;
     }
 
     setIsLoading(true);
     try {
-      // 👉 Llamada real al backend (API Hono)
-      const data = await login(email.trim(), password.trim());
+      const data = await registerApi(email.trim(), password.trim());
 
-      // Guardamos el usuario completo y el token en el contexto
       setUser(data.data.user);
       setToken(data.data.token);
 
-      // Navegamos a la pantalla principal
       router.replace("/(tabs)/home");
-    } catch (error) {
-      setErrorMessage("Credenciales inválidas o error de conexión");
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.error ||
+        "No se pudo registrar. Intenta con otro email o más tarde.";
+      setErrorMessage(msg);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleForgotPassword = () => {
-    Alert.alert("Recuperar Contraseña", "¿Deseas recuperar tu contraseña?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Recuperar",
-        onPress: () => console.log("Recuperar contraseña"),
-      },
-    ]);
   };
 
   return (
@@ -78,8 +78,10 @@ export default function LoginScreen() {
             <View style={indexStyles.logoContainer}>
               <Text style={indexStyles.logoText}>Tonic</Text>
             </View>
-            <Text style={indexStyles.welcomeText}>Bienvenido de nuevo</Text>
-            <Text style={indexStyles.subtitle}>Inicia sesión</Text>
+            <Text style={indexStyles.welcomeText}>Crear cuenta</Text>
+            <Text style={indexStyles.subtitle}>
+              Regístrate para comenzar a usar la app
+            </Text>
           </View>
 
           <View style={indexStyles.formContainer}>
@@ -89,12 +91,11 @@ export default function LoginScreen() {
               </View>
             ) : null}
 
-            {/* Campo Email */}
             <View style={indexStyles.inputContainer}>
               <Text style={indexStyles.label}>Email</Text>
               <TextInput
                 style={indexStyles.input}
-                placeholder="tonic@email.com"
+                placeholder="user@example.com"
                 placeholderTextColor={"#9CA3AF"}
                 value={email}
                 onChangeText={setEmail}
@@ -104,7 +105,6 @@ export default function LoginScreen() {
               />
             </View>
 
-            {/* Campo Contraseña */}
             <View style={indexStyles.inputContainer}>
               <Text style={indexStyles.label}>Contraseña</Text>
               <TextInput
@@ -117,38 +117,37 @@ export default function LoginScreen() {
               />
             </View>
 
-            {/* Olvidé contraseña */}
-            <TouchableOpacity
-              style={indexStyles.forgotPasswordContainer}
-              onPress={handleForgotPassword}
-            >
-              <Text style={indexStyles.forgotPasswordText}>
-                ¿Olvidaste tu contraseña?
-              </Text>
-            </TouchableOpacity>
+            <View style={indexStyles.inputContainer}>
+              <Text style={indexStyles.label}>Confirmar contraseña</Text>
+              <TextInput
+                style={indexStyles.input}
+                placeholder="******"
+                placeholderTextColor={"#9CA3AF"}
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+            </View>
 
-            {/* Botón de login */}
             <CustomButton
-              title={isLoading ? "Cargando..." : "Iniciar Sesión"}
-              onPress={handleLogin}
+              title={isLoading ? "Creando cuenta..." : "Registrarse"}
+              onPress={handleRegister}
               disabled={isLoading}
               style={indexStyles.loginButton}
             />
 
-            {/* Separador */}
             <View style={indexStyles.separatorContainer}>
               <View style={indexStyles.separatorLine} />
               <Text style={indexStyles.separatorText}>O</Text>
               <View style={indexStyles.separatorLine} />
             </View>
 
-            {/* Botón de registro */}
             <TouchableOpacity
               style={indexStyles.registerButton}
-              onPress={() => router.push("/register")}
+              onPress={() => router.replace("/")}
             >
               <Text style={indexStyles.registerButtonText}>
-                ¿No tienes una cuenta?
+                ¿Ya tienes una cuenta? Inicia sesión
               </Text>
             </TouchableOpacity>
           </View>

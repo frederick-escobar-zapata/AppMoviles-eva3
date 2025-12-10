@@ -5,10 +5,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '../../contexts/UserContext';
 
 export default function ProfileScreen() {
-  const { user, setUser } = useUser();
+  const { user, logout } = useUser();
 
   const handleLogout = () => {
-    setUser(null);
+    logout();
     router.replace('/');
   };
 

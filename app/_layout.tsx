@@ -20,6 +20,8 @@ export default function RootLayout() {
         <Stack>
           {/* Pantalla inicial: login (index.tsx), sin header */}
           <Stack.Screen name="index" options={{ headerShown: false }} />
+          {/* Pantalla de registro de usuario */}
+          <Stack.Screen name="register" options={{ headerShown: false }} />
           {/* Grupo de tabs (carpeta (tabs)), también sin header */}
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>

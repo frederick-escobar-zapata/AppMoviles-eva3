@@ -1,9 +1,16 @@
 // Este archivo define la navegación por pestañas (tabs) de la aplicación.
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
+import { useUser } from '../../contexts/UserContext';
 
 export default function TabLayout() {
+  const { isLoggedIn } = useUser();
+
+  if (!isLoggedIn) {
+    return <Redirect href="/" />;
+  }
+
   // Retorno el componente Tabs que configura las diferentes pestañas inferiores
   return (
     <Tabs
