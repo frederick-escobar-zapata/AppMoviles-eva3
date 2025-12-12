@@ -189,3 +189,91 @@ constants/
 - **Contraseña:** `1234` solo con esta contraseña
 
 *Proyecto académico desarrollado con fines educativos*
+
+
+--------------Evaluación 3 ----------------
+
+## Evaluación 3 – Integración con API Hono (backend remoto)
+
+En la Evaluación 3 llevo la app un paso más allá conectándola a un **backend real** desplegado en Cloudflare Workers con **Hono**:
+
+- URL base (configurada por variable de entorno):
+  - `EXPO_PUBLIC_API_URL=https://basic-hono-api.borisbelmarm.workers.dev`
+- Toda la lógica del backend la centralizo en `app/servicios/api.tsx`, donde:
+  - Configuro **Axios** con `baseURL` y un **interceptor** que agrega el `Authorization: Bearer <token>` a cada request.
+  - Implemento los endpoints de autenticación: `POST /auth/register` y `POST /auth/login`.
+  - Expongo el CRUD de tareas: `GET /todos`, `POST /todos`, `PATCH /todos/:id`, `DELETE /todos/:id`.
+  - Implemento subida de imágenes con `POST /images` usando `multipart/form-data`.
+
+### Autenticación contra el backend
+
+- En `app/index.tsx` (`LoginScreen`) llamo a `login(email, password)`:
+  - Si la API responde OK, guardo el **token** en `AsyncStorage` y en el `UserContext`.
+  - Navego automáticamente al grupo de tabs `/(tabs)/home`.
+- En `app/register.tsx` (`RegisterScreen`) llamo a `registerApi` para crear un nuevo usuario:
+  - Si el backend devuelve error (por ejemplo, email ya registrado), muestro el mensaje real en pantalla.
+- En `contexts/UserContext.tsx`:
+  - Hidrato `user` y `token` desde `AsyncStorage` al iniciar la app.
+  - Expongo `isLoggedIn` y `logout`.
+- En `app/(tabs)/_layout.tsx`:
+  - Solo renderizo las tabs si `isLoggedIn` es `true`; si no, hago `Redirect` al login.
+
+### Todo List 100% conectado al backend
+
+En la nueva pantalla `app/(tabs)/home.tsx`:
+
+- Al montar la pantalla llamo a `getTodos()` para obtener las tareas **desde el backend**; ya no uso AsyncStorage como fuente principal.
+- Para crear una tarea:
+  - Pido permisos de **ubicación** (`expo-location`) y obtengo `latitude` / `longitude`.
+  - Permito tomar una foto con la cámara o elegirla desde la galería (`expo-image-picker`).
+  - Subo la imagen a la API con `uploadImage(uri)` (`POST /images`), que me devuelve la URL guardada.
+  - Llamo a `createTodo({ title, completed: false, location, photoUri })` (`POST /todos`).
+  - Agrego la tarea devuelta al estado local para que se vea inmediatamente.
+- Para marcar una tarea como completada / no completada:
+  - Llamo a `updateTodo(id, { completed: !current.completed })` (`PATCH /todos/:id`).
+- Para eliminar una tarea:
+  - Llamo a `deleteTodo(id)` (`DELETE /todos/:id`).
+- Todas las tareas quedan **asociadas al usuario autenticado** porque el backend infiere el usuario por el token enviado en el header.
+
+### Manejo de imágenes con backend
+
+- Al crear una tarea, si hay una foto seleccionada:
+  - Construyo un `FormData` en `uploadImage` y envío el archivo a `POST /images`.
+  - El backend responde con una ruta relativa (`data.url`) y yo la convierto en URL absoluta usando `API_URL + data.url`.
+  - Guardo esa URL en el campo `photoUri` de la tarea.
+- En la lista (`TaskList` + `TaskItem`):
+  - Si una tarea tiene `photoUri`, muestro un icono de imagen.
+  - Al tocar el icono, abro un **modal** en `home.tsx` donde:
+    - Renderizo la imagen desde la URL devuelta por Hono.
+    - Muestro también la **URL como texto**, para evidenciar que viene del backend.
+
+### Ubicación con Google Maps
+
+- Cuando creo una tarea intento obtener la ubicación actual del dispositivo.
+- Si la tarea tiene coordenadas, muestro un icono de ubicación.
+- Al presionar ese icono, abro Google Maps en la posición guardada usando un `Linking.openURL` con una URL del tipo:
+  - `https://www.google.com/maps?q=<latitude>,<longitude>`.
+
+### Resumen técnico Evaluación 3
+
+- Autenticación y registro contra backend remoto (Hono API).
+- Token guardado en `AsyncStorage` y contexto global.
+- Rutas protegidas: las tabs solo se muestran si el usuario está autenticado.
+- Todo List completamente sincronizado con el servidor (sin almacenamiento local como fuente de verdad).
+- Subida de imágenes con `multipart/form-data` y uso de la URL que entrega el servidor.
+- Manejo de ubicación y apertura en Google Maps desde cada tarea.
+
+## Enlaces de video para demostracion en WEB
+
+- https://youtube.com/shorts/03285MiVlQ8?feature=share
+
+## Enlaces de video para demostracion en EXPO
+
+- https://youtube.com/shorts/sXgLPdpyc-U?feature=share
+
+
+## integrantes
+
+- Gonzalo Croft         / seccion 51      
+- Bastian Ceron         / seccion 50
+- Frederick Escobar     / seccion 50
