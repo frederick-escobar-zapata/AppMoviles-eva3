@@ -265,11 +265,11 @@ En la nueva pantalla `app/(tabs)/home.tsx`:
 
 ## Enlaces de video para demostracion en WEB
 
-- https://youtube.com/shorts/03285MiVlQ8?feature=share
+- https://www.youtube.com/shorts/03285MiVlQ8
 
 ## Enlaces de video para demostracion en EXPO
 
-- https://youtube.com/shorts/sXgLPdpyc-U?feature=share
+- https://www.youtube.com/shorts/sXgLPdpyc-U
 
 
 ## integrantes
